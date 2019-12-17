@@ -1,7 +1,7 @@
 import time
 import winsound
 
-from helper import *
+from _helper import *
 
 #  code wont work because file name not included in the dictionary as a key
 # to do this you have to get file name while reading the file

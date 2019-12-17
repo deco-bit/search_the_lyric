@@ -1,10 +1,10 @@
 import csv
-from f_indexer import forward_indexer
+from _f_indexer import forward_indexer
 from os import listdir
 from os.path import os
 from os.path import isfile, join
-from helper import docs_path, indexed_docs_path, f_index_path, stopwords_path, docs_subdir_log,read_doc_sub_directories
-from helper import get_out_path_for_f_index
+from _helper import docs_path, indexed_docs_path, f_index_path, stopwords_path, docs_subdir_log,read_doc_sub_directories
+from _helper import get_out_path_for_f_index
 
 output_path = ""
 sub_d=""

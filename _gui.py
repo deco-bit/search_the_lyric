@@ -1,7 +1,7 @@
 from tkinter import *
 from tkinter import ttk
 from tkinter.ttk import Treeview
-from helper import *
+from _helper import *
 root_window = Tk()
 
 root_window.title("Search the world of lyrics")

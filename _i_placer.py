@@ -1,5 +1,5 @@
-from i_indexer import inverted_indexer
-from helper import *
+from _i_indexer import inverted_indexer
+from _helper import *
 
 while 1:
     dir_dict_i = get_sub_dir_of_findex(docs_subdir_log)
