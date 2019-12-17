@@ -7,16 +7,39 @@ import  csv
 import copy
 import operator
 import math
-i_index_dir = "C:\\Users\\Mehdi\\Documents\\proj\\i_index"
-f_index_main_dir = "C:\\Users\\Mehdi\\Documents\\proj\\f_index"
-docs_subdir_path = 'C:\\Users\\Mehdi\\Documents\\proj\\docs_indexed\\doc_subdirectories.txt'
+
+# chose any path  -> this is the path where you will get all inverted indexes
+i_index_dir = "C:\\Users\\Public\\shit\proj\\i_index"
+
+# chose any path  -> this is the path where you will get all forward indexes
+f_index_main_dir = "C:\\Users\\Public\\shit\proj\\f_index"
+
+# add any path in place of what given below but make sure it has  *text file in it* ,
+# make sure that below path should match with whatever path you chose for
+# **indexed_doc_path** declared and defined below
+docs_subdir_log = 'C:\\Users\\Public\shit\proj\\docs_indexed\\doc_subdirectories.txt'
 
 
-# f_placer
-docs_path = "C:\\Users\Mehdi\\Documents\\proj\\docs"
-indexed_docs_path = "C:\\Users\\Mehdi\\Documents\\proj\\docs_indexed"
-stopwords_path = "C:\\Users\\Mehdi\\Documents\\proj\\stopwords\\stopwords.dat"
-f_index_path = "C:\\Users\\Mehdi\\Documents\\proj\\f_index"
+# chose any path -> this path must contain .csv file of dataset given at
+# "https://www.kaggle.com/gyani95/380000-lyrics-from-metrolyrics"
+
+
+#      ******************   NOTE   ******************************
+# The dataset given above is faulty, it has many places where rows of one field got mixed into another
+
+# TO see the fault open file converted in utf-8 , .csv format and search (I promise to kill them all til everybody's misse)
+# after this line there should be a new document (following csv format) but there is not tag/pattern for new file
+# You can fix it but checking that single quotation mark (") should only come in start of row and at end of it,
+# every other single quotation in between these two should be escaped using one more quotation i.e ("").
+
+docs_path = "C:\\Users\\Public\\shit\\proj\\docs"
+
+# make sure you have a text file on below path, file name = "doc_subdirectories.txt"
+indexed_docs_path = "C:\\Users\\Public\\shit\\proj\\docs_indexed"
+
+# make sure you download stop words file and put it with name "stopwords.dat" on below path
+stopwords_path = "C:\\Users\\Public\\shit\\proj\\stopwords\\stopwords.dat"
+f_index_path = "C:\\Users\\Public\\shit\\proj\\f_index"
 # f_placer
 
 dict_rest = {"con": 1, "prn": 1, "aux": 1, "nul": 1, "com1": 1, "com2": 1, "com": 1, "com4": 1, "com5": 1,
@@ -71,7 +94,6 @@ def query_parser(stopwords_path,query):
 
 
 def get_stopword_path():
-    stopwords_path = "C:\\Users\\Mehdi\\Documents\\proj\\stopwords\\stopwords.dat"
     return stopwords_path
 
 # free word query
@@ -355,7 +377,7 @@ def get_sub_dir_of_findex(sub_dir_log_file_path):
 def read_doc_sub_directories():
     # reading doc_subdirectories file to get name of all files that are indexed
     dir_dict = {}
-    with open(r'C:\\Users\\Mehdi\\Documents\\proj\\docs_indexed\\doc_subdirectories.txt') as csv_file:
+    with open(docs_subdir_log,'r') as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         for row in csv_reader:
             if row:

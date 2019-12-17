@@ -3,12 +3,12 @@ from f_indexer import forward_indexer
 from os import listdir
 from os.path import os
 from os.path import isfile, join
-from helper import docs_path, indexed_docs_path, f_index_path, stopwords_path, docs_subdir_path,read_doc_sub_directories
+from helper import docs_path, indexed_docs_path, f_index_path, stopwords_path, docs_subdir_log,read_doc_sub_directories
 from helper import get_out_path_for_f_index
 
 output_path = ""
 sub_d=""
-while 1 == 1:
+while 1:
 
     # get name of all documents in the directory which contain only those documents that are indexed or are to be
     # indexed
@@ -39,6 +39,6 @@ while 1 == 1:
             forward_indexer(stopwords_path, docs_path_n, output_path)
 
             # against new forward index document write name of the folder it is stored in
-            with open(docs_subdir_path, 'a') as out:
+            with open(docs_subdir_log, 'a') as out:
                 writer = csv.writer(out)
                 writer.writerow([str(doc), sub_d])

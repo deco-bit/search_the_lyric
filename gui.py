@@ -1,5 +1,5 @@
 from tkinter import *
-from tkinter import messagebox, ttk
+from tkinter import ttk
 from tkinter.ttk import Treeview
 from helper import *
 root_window = Tk()

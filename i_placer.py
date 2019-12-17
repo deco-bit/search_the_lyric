@@ -1,8 +1,8 @@
 from i_indexer import inverted_indexer
 from helper import *
 
-while 1 == 1:
-    dir_dict_i = get_sub_dir_of_findex(docs_subdir_path)
+while 1:
+    dir_dict_i = get_sub_dir_of_findex(docs_subdir_log)
     inverted_batch = {}
     for key in dir_dict_i:
         f_index = f_index_main_dir + "\\" + dir_dict_i[key] + "\\" + key

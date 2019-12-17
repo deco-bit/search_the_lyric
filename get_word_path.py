@@ -1,6 +1,6 @@
 # get hash value for word
 import mmh3
-i_index_dir = "C:\\Users\\Mehdi\\Documents\\proj\\i_index"
+i_index_dir = "C:\\Users\\Public\\shit\proj\\i_index"
 
 word = "damn"
 out_batch_address = ""
