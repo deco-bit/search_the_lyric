@@ -1,16 +1,15 @@
 import csv
 from nltk.stem import PorterStemmer
-from collections import defaultdict
 import time
 import re
-import io
 import winsound
+from _helper import store_on_hashed_directory, title_year_artist_genera_dir
 
 
 def forward_indexer(stopwords_file, data_set, output_file):
     # string that will hold entire posting of a batch of forward index , this is to avoid loops that will slow program
     out = ""
-
+    f = None
     try:
         # read stopwords
         f = open(stopwords_file, 'r')
@@ -25,7 +24,7 @@ def forward_indexer(stopwords_file, data_set, output_file):
     # close stopwords file
     f.close()
 
-    sw_d = dict.fromkeys(stopwords)
+    # sw_d = dict.fromkeys(stopwords)
     ps = PorterStemmer()
 
     # forward_batch is a dictionary, its key is word and element is a list of positions
@@ -44,12 +43,12 @@ def forward_indexer(stopwords_file, data_set, output_file):
                 #     continue
 
                 # concatenate title,year,artist,genre and lyric
-                title = row[1]
-                year = row[2]
-                artist = row[3]
-                genera = row[4]
+
                 # row[5] = lyric
                 tuple_a = row[1] + " " + row[2] + " " + row[3] + " " + row[4] + " " + row[5]
+                tyag_string = row[1] + "," + row[2] + "," + row[3] + "," + row[4]
+
+                store_on_hashed_directory(str(row[0]), tyag_string, title_year_artist_genera_dir,0)
 
                 # wrd_loci is all the possible locations of word
                 # on the basis of which precedence could be given to it on a query
@@ -110,7 +109,7 @@ def forward_indexer(stopwords_file, data_set, output_file):
 
                 out = out + row[0] + "," + str(doc_size) + "," + str(forward_batch) + "\n"
                 forward_batch = {}
-                tokens = []
+                # tokens = []
     except Exception as e:
         # print(tuple_a)
         freq = 2500
@@ -128,10 +127,10 @@ def forward_indexer(stopwords_file, data_set, output_file):
 
             fileOut.write(out)
     except Exception as e:
-        freq = 2500
-        duration = 1000
+        freqc = 2500
+        durationn = 1000
 
-        winsound.Beep(freq, duration)
+        winsound.Beep(freqc, durationn)
         print("In write:" + str(e))
         # no need to close as "with open" method automatically does this
 

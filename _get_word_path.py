@@ -2,7 +2,7 @@
 import mmh3
 i_index_dir = "C:\\Users\\Public\\shit\proj\\i_index"
 
-word = "damn"
+word = "123"
 out_batch_address = ""
 hashed = mmh3.hash(word)
 

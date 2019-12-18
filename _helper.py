@@ -1,33 +1,35 @@
-
-import  os
+import os
 from nltk.stem import PorterStemmer
 import re
 import mmh3
-import  csv
+import csv
 import copy
 import operator
 import math
 
+title_year_artist_genera_dir = "C:\\Users\\Public\\shit\\proj\\title_year_artist_genera"
+
 # chose any path  -> this is the path where you will get all inverted indexes
-i_index_dir = "C:\\Users\\Public\\shit\proj\\i_index"
+i_index_dir = "C:\\Users\\Public\\shit\\proj\\i_index"
 
 # chose any path  -> this is the path where you will get all forward indexes
-f_index_main_dir = "C:\\Users\\Public\\shit\proj\\f_index"
+f_index_main_dir = "C:\\Users\\Public\\shit\\proj\\f_index"
 
 # add any path in place of what given below but make sure it has  *text file in it* ,
 # make sure that below path should match with whatever path you chose for
 # **indexed_doc_path** declared and defined below
-docs_subdir_log = 'C:\\Users\\Public\shit\proj\\docs_indexed\\doc_subdirectories.txt'
-
+docs_subdir_log = 'C:\\Users\\Public\\shit\\proj\\docs_indexed\\doc_subdirectories.txt'
 
 # chose any path -> this path must contain .csv file of dataset given at
 # "https://www.kaggle.com/gyani95/380000-lyrics-from-metrolyrics"
 
 
 #      ******************   NOTE   ******************************
+
 # The dataset given above is faulty, it has many places where rows of one field got mixed into another
 
-# TO see the fault open file converted in utf-8 , .csv format and search (I promise to kill them all til everybody's misse)
+# TO see the fault open file converted in utf-8 , .csv format and search
+# (I promise to kill them all til everybody's misse)
 # after this line there should be a new document (following csv format) but there is not tag/pattern for new file
 # You can fix it but checking that single quotation mark (") should only come in start of row and at end of it,
 # every other single quotation in between these two should be escaped using one more quotation i.e ("").
@@ -43,10 +45,10 @@ f_index_path = "C:\\Users\\Public\\shit\\proj\\f_index"
 # f_placer
 
 dict_rest = {"con": 1, "prn": 1, "aux": 1, "nul": 1, "com1": 1, "com2": 1, "com": 1, "com4": 1, "com5": 1,
-                 "com6": 1,
-                 "com7": 1,
-                 "com8": 1, "com9": 1, "lpt1": 1, "lpt2": 1, "lpt3": 1, "lpt4": 1, "lpt5": 1,
-                 "lpt6": 1, "lpt7": 1, "lpt8": 1, "lpt9": 1}
+             "com6": 1,
+             "com7": 1,
+             "com8": 1, "com9": 1, "lpt1": 1, "lpt2": 1, "lpt3": 1, "lpt4": 1, "lpt5": 1,
+             "lpt6": 1, "lpt7": 1, "lpt8": 1, "lpt9": 1}
 
 
 # pick a folder you have ...
@@ -62,14 +64,14 @@ def get_size(path):
     return size
 
 
-def query_parser(stopwords_path,query):
+def query_parser(stopwords_path_, query):
+    f = None
     try:
         # read stopwords
-        f = open(stopwords_path, 'r')
+        f = open(stopwords_path_, 'r')
 
     except Exception as e:
         print(e)
-        f.close()
 
     # rstrip() method returns a copy of the string with trailing characters removed
     stopwords = [line.rstrip() for line in f]
@@ -77,10 +79,8 @@ def query_parser(stopwords_path,query):
     # close stopwords file
     f.close()
 
-    sw_d = dict.fromkeys(stopwords)
+    # sw_d = dict.fromkeys(stopwords) don't remember why wrote this
     ps = PorterStemmer()
-
-
 
     query = query.lower()
     tokens = re.sub(r'[^a-z0-9 ]', ' ', query)
@@ -90,37 +90,39 @@ def query_parser(stopwords_path,query):
     # stemming tokens
     tokens = [ps.stem(word) for word in tokens]
 
-    return  tokens
+    return tokens
 
 
 def get_stopword_path():
     return stopwords_path
 
+
 # free word query
 # free word query
 def get_qdict(path_list):
-    count = 0
-    wordSignal = 0
+    # count = 0
+    # word_signal = 0
+    # temp = 0
+    # idict = {}
+    # start_signal = 1
+    # postings_signal = 0
+    # word = ""
+    # forgot why declared above seven
 
-    docSignal = 0
-    posSignal = 0
-    temp = 0
-    idict = {}
-    startSignal = 1
-    postingsSignal = 0
-    word = ""
+    doc_signal = 0
+    pos_signal = 0
+
     doc = ""
     idict = {}
 
     for path in path_list:
 
-
         with open(path, encoding='utf-8') as csvFile:
-            readCSV = csv.reader(csvFile)
+            read_csv = csv.reader(csvFile)
             word = os.path.basename(path)[0:-4]
             idict[word] = {}
 
-            for row in readCSV:
+            for row in read_csv:
 
                 tupleD = str(row)
                 tokens = re.sub(r'[^\[\.#a-z0-9]', ' ', tupleD)
@@ -128,32 +130,30 @@ def get_qdict(path_list):
 
                 for t_word in tokens:
 
-
                     # if t_word == "|":
-                    #     wordSignal = 1
+                    #     word_signal = 1
                     #     continue
                     if t_word == "#":
-                        docSignal = 1
-                        posSignal = 0
+                        doc_signal = 1
+                        pos_signal = 0
 
                         continue
                     if t_word == "[":
-                        posSignal = 1
+                        pos_signal = 1
                         weight_signal = 0
                         continue
 
-
-                    if docSignal == 1:  # correct print order
+                    if doc_signal == 1:  # correct print order
 
                         doc = int(t_word)
                         if not idict.get(word):
-                            idict[word] = {doc : []}
+                            idict[word] = {doc: []}
                         else:
                             idict.get(word).update({doc: []})
 
-                        docSignal = 0
+                        doc_signal = 0
 
-                    if posSignal == 1:
+                    if pos_signal == 1:
 
                         # below specific way of code is simply not to repeatedly increase weight_signal
                         # when it is not required anymore
@@ -162,27 +162,19 @@ def get_qdict(path_list):
 
                         elif weight_signal == 0:
                             idict.get(word).get(doc).append(int(t_word))
-                            weight_signal =weight_signal+1
+                            weight_signal = weight_signal + 1
                         elif weight_signal == 1:
                             idict.get(word).get(doc).append(float(t_word))
-                            weight_signal = weight_signal+1
-
+                            weight_signal = weight_signal + 1
 
     return idict
 
 
-
 def get_wposting_path(query_string):
-    dict_rest = {"con": 1, "prn": 1, "aux": 1, "nul": 1, "com1": 1, "com2": 1, "com": 1, "com4": 1, "com5": 1,
-                 "com6": 1,
-                 "com7": 1,
-                 "com8": 1, "com9": 1, "lpt1": 1, "lpt2": 1, "lpt3": 1, "lpt4": 1, "lpt5": 1,
-                 "lpt6": 1, "lpt7": 1, "lpt8": 1, "lpt9": 1}
-
     path_list = []
-    restr   = 0
+    restr = 0
     qmatch_list = []
-    tokens = dict.fromkeys(query_parser(get_stopword_path(), query_string))
+    tokens = dict.fromkeys(query_parser(stopwords_path, query_string))
     for word in tokens:
         if word in dict_rest:
             word = "a" + word
@@ -207,20 +199,14 @@ def get_wposting_path(query_string):
             else:
                 qmatch_list.append(word)
 
-
-
             # .extend stores character wise.
 
-    return path_list,qmatch_list
+    return path_list, qmatch_list
 
 
-
-
-
-def unsorted_result(idict,query_list):
+def unsorted_result(idict, query_list):
     # intersection of documents on the basis of occurence of words of query
     doc_list = []
-
 
     # below variable is used to calculate the IDF -> inverse document frequency
     doc_with_required_terms = 0
@@ -232,10 +218,9 @@ def unsorted_result(idict,query_list):
     for word in idict_nosize:
         for doc in idict_nosize.get(word):
             # [2:] below     -> 0 for doc_size and 1 for location_weight
-            idict_nosize.get(word).update({doc:idict.get(word)[doc][2:]})
+            idict_nosize.get(word).update({doc: idict.get(word)[doc][2:]})
 
         # erraneoous             idict_nosize.get(word)[doc] = {doc:idict.get(word)[doc][1:]}
-
 
     # doc_list is a list of lists which conatin docs whcich have atleast one of the query word
     # for each word there could be one or more documents
@@ -247,25 +232,24 @@ def unsorted_result(idict,query_list):
     # intersection of sublists means that resulting list corresponds to entire processed query not part of it
     # it yields only those documents that have all the words of processed query
 
-    intersected_list = list(set.intersection(*map(set, doc_list)))
+    # there is possibility that doc_list is empty (when queried word do not exists in dataset)
+    # In that case doc_list won't be empty but
 
-
-
-
+    if len(doc_list) >= 1:
+        intersected_list = list(set.intersection(*map(set, doc_list)))
+    else:
+        intersected_list = []
 
     # intersection of the documents on the basis of position of words in it
     r_doc = {}
     # posting_list
-
 
     # intersected_list has all documents that have all words of query
     # now intersecting on the basis of position of words
 
     for doc in intersected_list:
         # float(idict.get(query_list[0])[doc][1]) is the location weight we given to each word of corpus
-        r_doc.update( {doc:float(idict.get(query_list[0])[doc][1])})
-
-
+        r_doc.update({doc: float(idict.get(query_list[0])[doc][1])})
 
         # we loop words of query in loop of docs (docs which have all query words)
         # if word is first word of query then do not make any change in positions
@@ -296,7 +280,7 @@ def unsorted_result(idict,query_list):
 
             # second operand of the plus in the below line is TF -> term frequency
 
-            r_doc[doc] = r_doc.get(doc) + float((len ( posting_list2 ))/(idict.get(query_list[0])[doc][0]))
+            r_doc[doc] = r_doc.get(doc) + float((len(posting_list2)) / (idict.get(query_list[0])[doc][0]))
 
             # IDF equation below
     if doc_with_required_terms == 0:
@@ -305,29 +289,27 @@ def unsorted_result(idict,query_list):
         idf = math.log(float(40134 / doc_with_required_terms), 10)
 
     for doc in r_doc:
-        r_doc[doc] =float(r_doc.get(doc)*idf)
-
+        r_doc[doc] = float(r_doc.get(doc) * idf)
 
     return r_doc
 
 
 def sort_result(r_doc):
-    if r_doc==-1:
+    if r_doc == -1:
+        # idiot len(r_doc)==0
         return -1
     else:
-
 
         sorted_r = {k: v for k, v in sorted(r_doc.items(), key=operator.itemgetter(1), reverse=True)}
         return sorted_r
 
 
-def get_hashed_directory(higher_directory,base_word,mask):
-
+def get_hashed_directory(higher_directory, base_word, mask):
     # higher_directory is the place where subdirectories are to be created
     # base_word is the word which is used to make hashed_directory on runtime
-    restricted=0
+    restricted = 0
     if base_word in dict_rest:
-        base_word = "a" + word
+        base_word = "a" + base_word
         restricted = 1
 
     # get hash value for word
@@ -341,12 +323,15 @@ def get_hashed_directory(higher_directory,base_word,mask):
     # print(inverted_batch.get("2009"))
     # exit(0)
     #  dont write word_i_index_path + "\\" + word + ".txt"
-    append_or_write = ""
+
+    # forgot why declared below var
+    # append_or_write = ""
 
     # hashed_path is path of folder where file is placed or to be placed
     # full_hashed_address is the full address of the file including the extension
     full_hashed_address = hashed_path + "\\" + base_word + ".txt"
-    return full_hashed_address,hashed_path,restricted
+    return full_hashed_address, hashed_path, restricted
+
 
 def check_for_path(hashed_path):
     if not os.path.exists(hashed_path):
@@ -354,19 +339,24 @@ def check_for_path(hashed_path):
         # append_or_write = 'w'
 
 
-
-
-def output_on_hashed_path(inverted_batch,full_hashed_address,base_word,restricted):
+# information to be stored on hashed path, hashed path, base word (base word could be different from key word)
+# restricted word flag, and a flag to tell whether the information is nested dictionary or string
+def output_on_hashed_path(information, full_hashed_address, base_word, restricted, single_nested_dict_or_str):
     with open(full_hashed_address, "w", encoding="utf8") as out:
         if restricted == 1:
-
             base_word = base_word[1:]
         writer = csv.writer(out)
-        writer.writerow(inverted_batch[base_word].items())
+        if single_nested_dict_or_str == 1:
+            writer.writerow(information[base_word].items())
+            # information[base_word].items() is entire posting list of a word. it is an entire dictionary
+
+        if single_nested_dict_or_str == 0:
+            writer.writerow([information])
+
 
 def get_sub_dir_of_findex(sub_dir_log_file_path):
-    dir_dict_i={}
-    with open(sub_dir_log_file_path,'r') as csv_file:
+    dir_dict_i = {}
+    with open(sub_dir_log_file_path, 'r') as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         for row in csv_reader:
             if row:
@@ -377,18 +367,19 @@ def get_sub_dir_of_findex(sub_dir_log_file_path):
 def read_doc_sub_directories():
     # reading doc_subdirectories file to get name of all files that are indexed
     dir_dict = {}
-    with open(docs_subdir_log,'r') as csv_file:
+    with open(docs_subdir_log, 'r') as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         for row in csv_reader:
             if row:
                 dir_dict[row[0]] = row[1]
     return dir_dict
 
-def get_out_path_for_f_index(doc,dir_dict,f_index_folder):
-    output_path=""
+
+def get_out_path_for_f_index(doc, f_index_folder):
+    output_path = ""
 
     # sub_d is required to update the sub directory of the forward index of a particular document
-    sub_d=str(doc)[:-4]
+    sub_d = str(doc)[:-4]
     if len(f_index_folder) == 0:
         # if f_index is empty it means not a single document is indexed
         # it means first folder is to be created let its name be the name of the document
@@ -400,12 +391,13 @@ def get_out_path_for_f_index(doc,dir_dict,f_index_folder):
             os.makedirs(path)
         output_path = path + "\\" + str(doc)
 
+        # forgot use of below commented code
         # now update f_index so that it contains name of newly created folder too
-        f_index_folder = [dI for dI in os.listdir(f_index_path) if
-                          os.path.isdir(os.path.join(f_index_path, dI))]
+        # f_index_folder = [dI for dI in os.listdir(f_index_path) if
+        #                   os.path.isdir(os.path.join(f_index_path, dI))]
 
     else:
-        data = {}
+        # data = {}
         # available_dir keeps track whether int he f_index directory there is any folder
         # whose size if less then our threshold limit
         available_dir = 0
@@ -430,4 +422,10 @@ def get_out_path_for_f_index(doc,dir_dict,f_index_folder):
                 os.makedirs(path)
             output_path = f_index_path + "\\" + str(doc)[:-4] + "\\" + str(doc)
 
-    return output_path,sub_d
+    return output_path, sub_d
+
+
+def store_on_hashed_directory(key_word, information, base_directory, single_nested_dict_or_str):
+    full_hashed_address, hashed_path, restricted = get_hashed_directory(base_directory, key_word, 255)
+    check_for_path(hashed_path)
+    output_on_hashed_path(information, full_hashed_address, key_word, restricted, single_nested_dict_or_str)

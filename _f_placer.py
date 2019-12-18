@@ -15,8 +15,10 @@ while 1:
     docs = [fa for fa in listdir(docs_path) if isfile(join(docs_path, fa))]
 
     # docs_indexed contain name of the documents in doc_path/docs that are already indexed
+    # indexed_docs_path contain indexed docs
     docs_indexed = [f for f in listdir(indexed_docs_path) if isfile(join(indexed_docs_path, f))]
-
+    # print(docs_indexed)
+    # exit(0)
     # extracting name of folder in f_index directory
     # f_index directory contain forward indices
     # if data set contain multiple files then f_index contain folder for each file and in it contains its forward_index
@@ -31,11 +33,13 @@ while 1:
 
         # if doc not in indexed directory then it needs to be indexed
         if doc not in dir_dict:
+
             # if f_index list is empty it means no folder in directory
-            output_path,sub_d = get_out_path_for_f_index(doc,dir_dict,f_index_folder)
+            output_path,sub_d = get_out_path_for_f_index(doc,f_index_folder)
 
             # docs_path_n is the path of nth doc in docs_path directory
             docs_path_n = docs_path + "\\" + str(doc)
+
             forward_indexer(stopwords_path, docs_path_n, output_path)
 
             # against new forward index document write name of the folder it is stored in
