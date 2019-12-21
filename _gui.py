@@ -1,3 +1,4 @@
+import time
 from tkinter import *
 from tkinter import ttk
 from tkinter.ttk import Treeview
@@ -44,11 +45,34 @@ def show_result(_sorted_r):
         if len(tyag) == 4:
             listBox.insert("", "end", values=(_sorted_r.get(doc), tyag[0], tyag[1], tyag[2],tyag[3]))
 
-
 def open_result():
+
+    start = time.time_ns()
+    # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
     path_list, qmatch_list = get_wposting_path(query_label.get())
+
+    end = time.time_ns()
+    print("get_wposting_path time below")
+    print(end - start)
+
+    start = time.time_ns()
+
+    # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
     idict = get_qdict(path_list)
+
+    end = time.time_ns()
+    print("get_qdict time below")
+    # print(idict.items())
+    print(end - start)
+    # exit(0)
+    start = time.time_ns()
+
+    # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
     r_doc = unsorted_result(idict, qmatch_list)
+    end = time.time_ns()
+    print("unsorted_result time below")
+    print(end - start)
+
     # result_window = Toplevel()
     # result_window.title("Result")
     out_label.config(text=str(len(r_doc)) + " results found")

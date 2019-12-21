@@ -1,4 +1,7 @@
 import os
+import pickle
+import time
+
 from nltk.stem import PorterStemmer
 import re
 import mmh3
@@ -23,6 +26,7 @@ docs_subdir_log = 'C:\\Users\\Public\\shit\\proj\\docs_indexed\\doc_subdirectori
 # chose any path -> this path must contain .csv file of dataset given at
 # "https://www.kaggle.com/gyani95/380000-lyrics-from-metrolyrics"
 
+i_log = "C:\\Users\\Public\\shit\\proj\\findex_i_indexed\\findex_i_indexed.txt"
 
 #      ******************   NOTE   ******************************
 
@@ -75,6 +79,9 @@ def query_parser(stopwords_path_, query):
 
     # rstrip() method returns a copy of the string with trailing characters removed
     stopwords = [line.rstrip() for line in f]
+    #
+    # tokens = [ps.stem(word) for word in  [x for x in (re.sub(r'[^a-z0-9 ]', ' ', query.lower())).split() if x not
+    # in [line.rstrip() for line in f]]]
 
     # close stopwords file
     f.close()
@@ -117,56 +124,65 @@ def get_qdict(path_list):
 
     for path in path_list:
 
-        with open(path, encoding='utf-8') as csvFile:
-            read_csv = csv.reader(csvFile)
-            word = os.path.basename(path)[0:-4]
-            idict[word] = {}
+        with open(path, "rb") as pickle_read:
+            # read_csv = csv.reader(csvFile)
+            word = os.path.basename(path)[0:-7]
+            idict[word] = pickle.load(pickle_read)
 
-            for row in read_csv:
-
-                tupleD = str(row)
-                tokens = re.sub(r'[^\[\.#a-z0-9]', ' ', tupleD)
-                tokens = tokens.split()
-
-                for t_word in tokens:
+            # for row in read_csv:
+            #
+            #     # tupleD = str(row)
+            #     # tokens = re.sub(r'[^\[\.#a-z0-9]', ' ', row)
+            #     # tokens = tokens.split()
+            #     start = time.time_ns()
+            #     print(str(row))
+            #     tokens = (re.sub(r'[^\[\.#a-z0-9]', ' ', str(row))).split()
+            #     # print(tokens)
+            #     end = time.time_ns()
+            #     print("pos_sig")
+            #     print(end - start)
+            #
+            #     for t_word in tokens:
 
                     # if t_word == "|":
                     #     word_signal = 1
                     #     continue
-                    if t_word == "#":
-                        doc_signal = 1
-                        pos_signal = 0
+                    # if t_word == "#":
+                    #     doc_signal = 1
+                    #     pos_signal = 0
+                    #
+                    #     continue
+                    # if t_word == "[":
+                    #     pos_signal = 1
+                    #     weight_signal = 0
+                    #     continue
 
-                        continue
-                    if t_word == "[":
-                        pos_signal = 1
-                        weight_signal = 0
-                        continue
+                    # if doc_signal == 1:  # correct print order
+                    #
+                    #     doc = int(t_word)
+                    #     if not idict.get(word):
+                    #         idict[word] = {doc: []}
+                    #     else:
+                    #         idict.get(word).update({doc: []})
+                    #
+                    #     doc_signal = 0
 
-                    if doc_signal == 1:  # correct print order
-
-                        doc = int(t_word)
-                        if not idict.get(word):
-                            idict[word] = {doc: []}
-                        else:
-                            idict.get(word).update({doc: []})
-
-                        doc_signal = 0
-
-                    if pos_signal == 1:
-
-                        # below specific way of code is simply not to repeatedly increase weight_signal
-                        # when it is not required anymore
-                        if weight_signal > 1:
-                            idict.get(word).get(doc).append(int(t_word))
-
-                        elif weight_signal == 0:
-                            idict.get(word).get(doc).append(int(t_word))
-                            weight_signal = weight_signal + 1
-                        elif weight_signal == 1:
-                            idict.get(word).get(doc).append(float(t_word))
-                            weight_signal = weight_signal + 1
-
+                    # if pos_signal == 1:
+                    #
+                    #     # below specific way of code is simply not to repeatedly increase weight_signal
+                    #     # when it is not required anymore
+                    #     if weight_signal > 1:
+                    #         idict.get(word).get(doc).append(int(t_word))
+                    #
+                    #     elif weight_signal == 0:
+                    #         idict.get(word).get(doc).append(int(t_word))
+                    #         weight_signal = weight_signal + 1
+                    #     elif weight_signal == 1:
+                    #         idict.get(word).get(doc).append(float(t_word))
+                    #         weight_signal = weight_signal + 1
+                # end = time.time_ns()
+                # print("pos_sig")
+                # print(end - start)
     return idict
 
 
@@ -175,29 +191,44 @@ def get_wposting_path(query_string):
     restr = 0
     qmatch_list = []
     tokens = dict.fromkeys(query_parser(stopwords_path, query_string))
+
     for word in tokens:
         if word in dict_rest:
-            word = "a" + word
+            word = word[1:]
             restr = 1
 
         # get hash value for word
         hashed = mmh3.hash(word)
-        # declare mask
-        mask = 255
+
         # int for folder 1
-        folder1 = hashed & mask
+        folder1 = hashed & 255
         # int for folder 2
-        folder2 = (hashed >> 8) & mask
+        folder2 = (hashed >> 8) & 255
         word_i_index_path = i_index_dir + "\\" + "{:0>3d}".format(folder1) + "\\" + "{:0>3d}".format(folder2)
-        output_batch_address = word_i_index_path + "\\" + word + ".txt"
+
+        output_batch_address = word_i_index_path + "\\" + word + ".pickle"
 
         if os.path.exists(output_batch_address):
             path_list.append(output_batch_address)
+            # print(path_list)
+            # exit(0)
             if restr == 1:
                 restr == 0
-                qmatch_list.append(word[1:])
-            else:
-                qmatch_list.append(word)
+
+                # order of if conditions is on the basis of probability of occurance of a particular word
+                if word[0] == "o":
+                    word = "c" + word
+                elif word[0] == "p":
+                    key_word = "l" + word
+                elif word[0] == "u":
+                    if word[1] == "x":
+                        key_word = "a" + word
+                    elif word[1] == "l":
+                        key_word = "n" + word
+                elif word[0] == "r":
+                    key_word = "p" + word
+
+            qmatch_list.append(word)
 
             # .extend stores character wise.
 
@@ -208,6 +239,8 @@ def unsorted_result(idict, query_list):
     # intersection of documents on the basis of occurence of words of query
     doc_list = []
 
+    # print((idict.get("ego").get("0")))
+    # exit(0)
     # below variable is used to calculate the IDF -> inverse document frequency
     doc_with_required_terms = 0
 
@@ -251,6 +284,7 @@ def unsorted_result(idict, query_list):
         # float(idict.get(query_list[0])[doc][1]) is the location weight we given to each word of corpus
         r_doc.update({doc: float(idict.get(query_list[0])[doc][1])})
 
+
         # we loop words of query in loop of docs (docs which have all query words)
         # if word is first word of query then do not make any change in positions
         first_word = 1
@@ -269,6 +303,8 @@ def unsorted_result(idict, query_list):
                 posting_list.append((idict_nosize.get(word)[doc]))
                 continue
             else:
+                # print(type((idict_nosize.get(word)[doc][0])))
+                # exit(0)
                 idict_nosize.get(word)[doc] = [x - word_no for x in idict_nosize.get(word)[doc]]
                 posting_list.append(idict_nosize.get(word)[doc])
 
@@ -280,7 +316,14 @@ def unsorted_result(idict, query_list):
 
             # second operand of the plus in the below line is TF -> term frequency
 
-            r_doc[doc] = r_doc.get(doc) + float((len(posting_list2)) / (idict.get(query_list[0])[doc][0]))
+            # print(type(r_doc.get(doc)))
+            # print(type(float((len(posting_list2)))))
+            #
+            # # use be4low code to debug about query_list[0]
+            # print(type(float((idict.get(query_list[0])[doc][0]))))
+            # exit(0)
+            # print(type(float((idict.get(query_list[0])[doc][0]))))
+            r_doc[doc] = (r_doc.get(doc)) + float(len(posting_list2)) / float((idict.get(query_list[0])[doc][0]))
 
             # IDF equation below
     if doc_with_required_terms == 0:
@@ -304,16 +347,30 @@ def sort_result(r_doc):
         return sorted_r
 
 
-def get_hashed_directory(higher_directory, base_word, mask):
+def get_hashed_directory(higher_directory, key_word, mask):
     # higher_directory is the place where subdirectories are to be created
-    # base_word is the word which is used to make hashed_directory on runtime
+    # key_word is the word which is used to make hashed_directory on runtime
+
     restricted = 0
-    if base_word in dict_rest:
-        base_word = "a" + base_word
+    if key_word in dict_rest:
+        # there could be two logics to cater for restricted words
+        # append/ change word for immutable objects passing acts as pass by value so you have to return this
+        # changes string here and return string to outer function -> this is relatively slow process
+
+        # better approach is to find a pattern in the restricted words, make use of that pattern
+        # if you notice for restricted words you can just remove first letter
+        # restricted signal will tell whether the letter is removed or not
+        # if letter is removed then make use of pattern you observed in restricted words
+
+        # if restricted is one and the first letter is o then just append c in the start
+        #  if restricted is one and the first letter is p then just append l in the start
+        #  if restricted is one and the first letter is r then just append p in the start
+        # if restricted is one and the first letter is u then check for second letter
+        key_word = key_word[1:]
         restricted = 1
 
     # get hash value for word
-    hashed = mmh3.hash(base_word)
+    hashed = mmh3.hash(key_word)
     # declare mask
     # int for folder 1
     folder1 = hashed & mask
@@ -329,29 +386,64 @@ def get_hashed_directory(higher_directory, base_word, mask):
 
     # hashed_path is path of folder where file is placed or to be placed
     # full_hashed_address is the full address of the file including the extension
-    full_hashed_address = hashed_path + "\\" + base_word + ".txt"
+    full_hashed_address = hashed_path + "\\" + key_word + ".pickle"
     return full_hashed_address, hashed_path, restricted
 
 
 def check_for_path(hashed_path):
     if not os.path.exists(hashed_path):
+        # with open (full_hashed_address,"wb") as p_file:
+        #     pickle.dump({},p_file)
         os.makedirs(hashed_path)
         # append_or_write = 'w'
 
 
 # information to be stored on hashed path, hashed path, base word (base word could be different from key word)
 # restricted word flag, and a flag to tell whether the information is nested dictionary or string
-def output_on_hashed_path(information, full_hashed_address, base_word, restricted, single_nested_dict_or_str):
-    with open(full_hashed_address, "w", encoding="utf8") as out:
-        if restricted == 1:
-            base_word = base_word[1:]
-        writer = csv.writer(out)
-        if single_nested_dict_or_str == 1:
-            writer.writerow(information[base_word].items())
-            # information[base_word].items() is entire posting list of a word. it is an entire dictionary
+def output_on_hashed_path(information, full_hashed_address, key_word, restricted, single_nested_dict_or_str):
+    if restricted == 1:
+        # if restricted is one and the first letter is o then just append c in the start
+        #  if restricted is one and the first letter is p then just append l in the start
+        #  if restricted is one and the first letter is r then just append p in the start
+        # if restricted is one and the first letter is u then check for second letter
 
-        if single_nested_dict_or_str == 0:
-            writer.writerow([information])
+        # order of if conditions is on the basis of probability of occurance of a particular word
+        if key_word[0] == "o":
+            key_word = "c" + key_word
+        elif key_word[0] == "p":
+            key_word = "l" + key_word
+        elif key_word[0] == "u":
+            if key_word[1] == "x":
+                key_word = "a" + key_word
+            elif key_word[1] == "l":
+                key_word = "n" + key_word
+        elif key_word[0] == "r":
+            key_word = "p" + key_word
+    # pickle_in = open ( full_hashed_address , "rb" )
+    # pickle_in =  pickle.load(pickle_in)
+    # print(full_hashed_address)
+    # exit(0)
+    pickle_in = {}
+    if os.path.exists(full_hashed_address):
+
+        if os.path.getsize(full_hashed_address) > 0:
+            with open(full_hashed_address, "rb") as input_file:
+                pickle_in = pickle.load(input_file)
+
+    with open(full_hashed_address, "wb") as out:
+
+        # writer = csv.writer(out)
+        if single_nested_dict_or_str == 1:
+            # print(pickle_in)
+            # exit(9)
+            pickle_in.update(information[key_word].items())
+            pickle.dump(pickle_in, out)
+            # writer.writerow(information[key_word].items())
+            # information[key_word].items() is entire posting list of a word. it is an entire dictionary
+
+        # string case is ditched
+        # if single_nested_dict_or_str == 0:
+        #     writer.writerow([information])
 
 
 def get_sub_dir_of_findex(sub_dir_log_file_path):
@@ -375,6 +467,16 @@ def read_doc_sub_directories():
     return dir_dict
 
 
+def read_ilog():
+    _ilog = {}
+    with open(i_log, 'r') as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        for row in csv_reader:
+            if row:
+                _ilog[row[0]] = row[1]
+    return _ilog
+
+
 def get_out_path_for_f_index(doc, f_index_folder):
     output_path = ""
 
@@ -387,6 +489,7 @@ def get_out_path_for_f_index(doc, f_index_folder):
         # then that document index is also stored in folder having name of previous document
         # %%%%%%%%%%%%%%%%%% to_do:    give folders proper naming
         path = f_index_path + "\\" + str(doc)[:-4]
+
         if not os.path.exists(path):
             os.makedirs(path)
         output_path = path + "\\" + str(doc)
@@ -426,6 +529,8 @@ def get_out_path_for_f_index(doc, f_index_folder):
 
 
 def store_on_hashed_directory(key_word, information, base_directory, single_nested_dict_or_str):
+    # exit(0)
     full_hashed_address, hashed_path, restricted = get_hashed_directory(base_directory, key_word, 255)
     check_for_path(hashed_path)
+
     output_on_hashed_path(information, full_hashed_address, key_word, restricted, single_nested_dict_or_str)

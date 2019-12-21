@@ -8,12 +8,13 @@ def inverted_indexer(forwardindex_file):
     # inverted index ad dictionary
     inverted_batch = {}
 
+    start = time.time()
     # tells whether next word in list is keyword or position in doc
     word_signal = 0
 
     # tells whether next word in list is keyword or position in doc
     pos_signal = 0
-
+    location_flag = 0
     try:
 
         with open(forwardindex_file) as csvFile:
@@ -31,8 +32,8 @@ def inverted_indexer(forwardindex_file):
                 tokens = tokens.split()
 
                 # adding "#" before each docNumber as a signal word, it will be simplify parsing of invertedIndex file
-                doc_no = "(#)" + row[0]
-                doc_size = row[1]
+                doc_no = int(row[0])
+                doc_size = int(row[1])
 
                 for word in tokens:
 
@@ -70,14 +71,21 @@ def inverted_indexer(forwardindex_file):
 
                                 # if word is in inverted dict and doc_no also in doc_dict of inverteddict
                                 # then add positions in docDic value(list)
+                                if location_flag == 1:
+                                    (inverted_batch.get(temp_word)).get(doc_no).append(float(word))
+                                    location_flag = 0
 
-                                (inverted_batch.get(temp_word)).get(doc_no).append(word)
+                                else:
+                                    (inverted_batch.get(temp_word)).get(doc_no).append(int(word))
+
+
 
 
 
                             else:
                                 # if there is no key for docNO in doc_dict dict then add it
 
+                                location_flag = 1
                                 inverted_batch.get(temp_word)[doc_no] = [doc_size, word]
 
 
@@ -91,4 +99,12 @@ def inverted_indexer(forwardindex_file):
 
     except Exception as e:
         print(e)
+
+    end = time.time()
+    print(end - start)
     return inverted_batch
+
+    # freq = 2500
+    # duration = 1000
+    #
+    # winsound.Beep(freq, duration)

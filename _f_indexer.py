@@ -7,6 +7,7 @@ from _helper import store_on_hashed_directory, title_year_artist_genera_dir
 
 
 def forward_indexer(stopwords_file, data_set, output_file):
+    start = time.time()
     # string that will hold entire posting of a batch of forward index , this is to avoid loops that will slow program
     out = ""
     f = None
@@ -46,9 +47,9 @@ def forward_indexer(stopwords_file, data_set, output_file):
 
                 # row[5] = lyric
                 tuple_a = row[1] + " " + row[2] + " " + row[3] + " " + row[4] + " " + row[5]
-                tyag_string = row[1] + "," + row[2] + "," + row[3] + "," + row[4]
+                # tyag_string = row[1] + "," + row[2] + "," + row[3] + "," + row[4]
 
-                store_on_hashed_directory(str(row[0]), tyag_string, title_year_artist_genera_dir,0)
+                # store_on_hashed_directory(str(row[0]), tyag_string, title_year_artist_genera_dir,0)
 
                 # wrd_loci is all the possible locations of word
                 # on the basis of which precedence could be given to it on a query
@@ -85,7 +86,7 @@ def forward_indexer(stopwords_file, data_set, output_file):
                 # stemming tokens
                 tokens = [ps.stem(word) for word in tokens]
                 doc_size = len(tokens)
-
+                print(row[0])
                 # index storing index of word in tokenized  list
                 for index, word in enumerate(tokens):
 
@@ -116,7 +117,9 @@ def forward_indexer(stopwords_file, data_set, output_file):
         duration = 1000
 
         winsound.Beep(freq, duration)
-        print("doc:" + row[0] + " index: " + index + " word: " + word)
+
+        print("doc:" + row[0] + " index: " + index )
+        print(word)
         print("In Read:" + str(e))
         # no need to close as "with open" method automatically does this
 
@@ -126,6 +129,9 @@ def forward_indexer(stopwords_file, data_set, output_file):
         with open(output_file, "w", encoding="utf8") as fileOut:
 
             fileOut.write(out)
+
+            end = time.time()
+            print(end - start)
     except Exception as e:
         freqc = 2500
         durationn = 1000
@@ -135,10 +141,9 @@ def forward_indexer(stopwords_file, data_set, output_file):
         # no need to close as "with open" method automatically does this
 
 
-start = time.time()
 
-end = time.time()
-print(end - start)
+
+
 
 freq = 2500
 duration = 1000

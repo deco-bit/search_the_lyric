@@ -1,13 +1,17 @@
 import csv
+import multiprocessing
+
 from _f_indexer import forward_indexer
 from os import listdir
 from os.path import os
 from os.path import isfile, join
-from _helper import docs_path, indexed_docs_path, f_index_path, stopwords_path, docs_subdir_log,read_doc_sub_directories
+from _helper import docs_path, indexed_docs_path, f_index_path, stopwords_path, docs_subdir_log, \
+    read_doc_sub_directories
 from _helper import get_out_path_for_f_index
 
 output_path = ""
-sub_d=""
+sub_d = ""
+
 while 1:
 
     # get name of all documents in the directory which contain only those documents that are indexed or are to be
@@ -27,15 +31,15 @@ while 1:
     for doc in docs:
 
         f_index_folder = [dI for dI in os.listdir(f_index_path) if os.path.isdir(os.path.join(f_index_path, dI))]
-
+        # print(f_index_folder)
+        # exit(0)
         # reading doc_subdirectories file to get name of all files that are indexed
         dir_dict = read_doc_sub_directories()
 
         # if doc not in indexed directory then it needs to be indexed
         if doc not in dir_dict:
-
             # if f_index list is empty it means no folder in directory
-            output_path,sub_d = get_out_path_for_f_index(doc,f_index_folder)
+            output_path, sub_d = get_out_path_for_f_index(doc, f_index_folder)
 
             # docs_path_n is the path of nth doc in docs_path directory
             docs_path_n = docs_path + "\\" + str(doc)
